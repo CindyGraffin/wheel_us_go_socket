@@ -46,12 +46,17 @@ io.on('connection', (socket) => {
     // send and get message
     socket.on('sendMessage', ({senderId, receiverId, text}) => {
         const receiver = getReceiver(receiverId) 
-        if (receiver) {
-            io.to(receiver.socketId).emit('getMessage', {
-                senderId,
-                text
-            })
-        }
+        const respond = () => setTimeout(() => {
+            if (receiver) {
+                io.to(receiver.socketId).emit('getMessage', {
+                    senderId,
+                    text
+                })
+            }
+        }, 300)
+        respond()
+        
+        
         
     })
     // when disconnect
