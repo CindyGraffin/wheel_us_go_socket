@@ -3,9 +3,11 @@ import express, {Request, Response} from 'express';
 
 import cors from 'cors'
 
-const port = 8900;
+const index = './index.html'
+const port = 8080;
 const server = express()
     .use(cors())
+    .use((req, res) => res.sendFile(index, { root: __dirname }))
     .listen(port, () =>console.log(`listening on port ${port}`))
 
 const io = new Server(server, {
@@ -44,10 +46,13 @@ io.on('connection', (socket) => {
     // send and get message
     socket.on('sendMessage', ({senderId, receiverId, text}) => {
         const receiver = getReceiver(receiverId) 
-        io.to(receiver.socketId).emit('getMessage', {
-            senderId,
-            text
-        })
+        if (receiver) {
+            io.to(receiver.socketId).emit('getMessage', {
+                senderId,
+                text
+            })
+        }
+        
     })
     // when disconnect
     socket.on('disconnect', () => { 
