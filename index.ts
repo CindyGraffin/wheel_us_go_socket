@@ -1,14 +1,23 @@
 import { Server } from 'socket.io';
+import express, {Request, Response} from 'express';
 
-// call to socket.io server 
-const io = new Server(8900, {
-    // allow our app to connect to that server
+import cors from 'cors'
+
+const index = './index.html'
+const port = 8080;
+const server = express()
+    .use(cors())
+    .use((req, res) => res.sendFile(index, { root: __dirname }))
+    .listen(port, () =>console.log(`listening on port ${port}`))
+
+const io = new Server(server, {
     cors: {
-        origin: "*"
+        origin: '*'
     }
 })
 
 let users: any = []
+
 
 const addUser = (userId: any, socketId: any) => {
     !users.some((user: any) => user.userId === userId) && 
@@ -20,13 +29,14 @@ const removeUser = (socketId: any) => {
 } 
 
 const getReceiver = (receiverId: any) => {
-    return users.find((user: any) => user.userId === receiverId)
+    return users.find((user: any) => user.userId === receiverId) 
 }
 
-io.on('connection', (socket) => {
-    // when connect
-    console.log('a user connected');
-
+io.on('connection', (socket) => { 
+    console.log('client connected'); 
+    socket.on('disconnect',() => {
+        console.log('disconnect');
+    })
     // take userId and socketId from user
     socket.on('addUser', userId =>  {
         addUser(userId, socket.id)
@@ -35,13 +45,15 @@ io.on('connection', (socket) => {
 
     // send and get message
     socket.on('sendMessage', ({senderId, receiverId, text}) => {
-        const receiver = getReceiver(receiverId)
-        io.to(receiver.socketId).emit('getMessage', {
-            senderId,
-            text
-        })
+        const receiver = getReceiver(receiverId) 
+        if (receiver) {
+            io.to(receiver.socketId).emit('getMessage', {
+                senderId,
+                text
+            })
+        }
+        
     })
-
     // when disconnect
     socket.on('disconnect', () => { 
         console.log('user disconnected');
@@ -49,5 +61,8 @@ io.on('connection', (socket) => {
         io.emit('getUsers', users)
         
     })
+    
 })
- 
+
+
+
