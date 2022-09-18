@@ -21,8 +21,10 @@ let users: any = []
 
 
 const addUser = (userId: any, socketId: any) => {
-    !users.some((user: any) => user.userId === userId) && 
+    if (userId && socketId) {
+        !users.some((user: any) => user.userId === userId) && 
         users.push({userId, socketId})
+    }   
 }
 
 const removeUser = (socketId: any) => {
