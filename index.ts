@@ -1,13 +1,14 @@
 import { Server } from 'socket.io';
 import express, {Request, Response} from 'express';
 
+
 import cors from 'cors'
 
 const index = './index.html'
 const port = 8080;
 const server = express()
     .use(cors())
-    .use((req, res) => res.sendFile(index, { root: __dirname }))
+    .use((req: Request, res: Response) => res.sendFile(index, { root: __dirname }))
     .listen(port, () =>console.log(`listening on port ${port}`))
 
 const io = new Server(server, {
@@ -16,12 +17,14 @@ const io = new Server(server, {
     }
 })
 
-let users: any = []
+let users: any = [] 
 
 
 const addUser = (userId: any, socketId: any) => {
-    !users.some((user: any) => user.userId === userId) && 
+    if (userId && socketId) {
+        !users.some((user: any) => user.userId === userId) && 
         users.push({userId, socketId})
+    }   
 }
 
 const removeUser = (socketId: any) => {
@@ -46,14 +49,16 @@ io.on('connection', (socket) => {
     // send and get message
     socket.on('sendMessage', ({senderId, receiverId, text}) => {
         const receiver = getReceiver(receiverId) 
-        if (receiver) {
-            io.to(receiver.socketId).emit('getMessage', {
-                senderId,
-                text
-            })
-        }
-        
-    })
+        const respond = () => setTimeout(() => {
+            if (receiver) {
+                io.to(receiver.socketId).emit('getMessage', {
+                    senderId,
+                    text
+                })
+            }
+        }, 500)
+        respond()        
+    }) 
     // when disconnect
     socket.on('disconnect', () => { 
         console.log('user disconnected');
@@ -63,6 +68,5 @@ io.on('connection', (socket) => {
     })
     
 })
-
 
 
