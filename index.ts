@@ -1,13 +1,14 @@
 import { Server } from 'socket.io';
 import express, {Request, Response} from 'express';
 
+
 import cors from 'cors'
 
 const index = './index.html'
 const port = 8080;
 const server = express()
     .use(cors())
-    .use((req, res) => res.sendFile(index, { root: __dirname }))
+    .use((req: Request, res: Response) => res.sendFile(index, { root: __dirname }))
     .listen(port, () =>console.log(`listening on port ${port}`))
 
 const io = new Server(server, {
@@ -16,7 +17,7 @@ const io = new Server(server, {
     }
 })
 
-let users: any = []
+let users: any = [] 
 
 
 const addUser = (userId: any, socketId: any) => {
@@ -53,12 +54,9 @@ io.on('connection', (socket) => {
                     text
                 })
             }
-        }, 300)
-        respond()
-        
-        
-        
-    })
+        }, 500)
+        respond()        
+    }) 
     // when disconnect
     socket.on('disconnect', () => { 
         console.log('user disconnected');
@@ -68,6 +66,5 @@ io.on('connection', (socket) => {
     })
     
 })
-
 
 
