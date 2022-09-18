@@ -21,7 +21,7 @@ let users: any = []
 
 
 const addUser = (userId: any, socketId: any) => {
-    if (userId && socketId) {
+    if (userId !== null && socketId) {
         !users.some((user: any) => user.userId === userId) && 
         users.push({userId, socketId})
     }   
