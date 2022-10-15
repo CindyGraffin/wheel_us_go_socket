@@ -9,7 +9,7 @@ const port = 8080;
 const server = express()
     .use(cors())
     .use((req: Request, res: Response) => res.sendFile(index, { root: __dirname }))
-    .listen(port, () =>console.log(`listening on port ${port}`))
+    .listen(port)
 
 const io = new Server(server, {
     cors: {
@@ -36,10 +36,6 @@ const getReceiver = (receiverId: any) => {
 }
 
 io.on('connection', (socket) => { 
-    console.log('client connected'); 
-    socket.on('disconnect',() => {
-        console.log('disconnect');
-    })
     // take userId and socketId from user
     socket.on('addUser', userId =>  {
         addUser(userId, socket.id)
@@ -56,14 +52,12 @@ io.on('connection', (socket) => {
                     text
                 })
             }
-        }, 500)
+        }, 800)
         respond()        
     }) 
     // when disconnect
     socket.on('disconnect', () => { 
-        console.log('user disconnected');
         removeUser(socket.id)
-        io.emit('getUsers', users)
         
     })
     
